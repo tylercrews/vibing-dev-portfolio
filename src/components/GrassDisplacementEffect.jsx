@@ -1,11 +1,9 @@
 import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 
-export default function FurField() {
+export default function GrassDisplacement() {
   const containerRef = useRef();
-  const mouse = useRef(new THREE.Vector2(0.5, 0.5));
-  const lastMouse = useRef(new THREE.Vector2(0.5, 0.5));
-  const direction = useRef(0);
+  const mouse = useRef(new THREE.Vector2());
 
   useEffect(() => {
     const container = containerRef.current;
@@ -14,72 +12,38 @@ export default function FurField() {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100);
-    camera.position.set(0, 2, 4);
+    camera.position.set(0, 2, 5);
     camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(width, height);
     container.appendChild(renderer.domElement);
 
-    const countX = 100;
-    const countZ = 100;
-    const total = countX * countZ;
-    const dummy = new THREE.Object3D();
+    const blades = [];
+    const bladeCountX = 100;
+    const spacing = 0.1;
 
-    const grassHeight = 0.6;
-    const baseGeometry = new THREE.CylinderGeometry(0.005, 0.005, grassHeight, 6, 60, true);
-    const baseMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        uMouse: { value: new THREE.Vector2(0.5, 0.5) },
-        uDirection: { value: 0.0 },
-      },
-      vertexShader: `
-        uniform vec2 uMouse;
-        uniform float uDirection;
-        varying vec3 vColor;
+    const geometry = new THREE.BufferGeometry();
+    const points = new Float32Array(6);
+    points[0] = 0; points[1] = 0; points[2] = 0;
+    points[3] = 0; points[4] = 1; points[5] = 0;
+    geometry.setAttribute('position', new THREE.BufferAttribute(points, 3));
 
-        void main() {
-          vec3 transformed = position;
-          float factor = (transformed.y + ${grassHeight / 2.0}) / ${grassHeight};
-          vec4 basePos = modelMatrix * vec4(0.0, -${grassHeight / 2.0}, 0.0, 1.0);
-          float dist = distance(vec2(basePos.x, basePos.z), uMouse);
-          float force = 3.0 * exp(-2.0 * dist); // more sensitive
+    const material = new THREE.LineBasicMaterial({ color: 'green' });
 
-          float angle = force * uDirection * 1.57 * factor;
-          float cosA = cos(angle);
-          float sinA = sin(angle);
-
-          float newX = transformed.x * cosA - transformed.y * sinA;
-          transformed.y = transformed.x * sinA + transformed.y * cosA;
-          transformed.x = newX;
-
-          vColor = vec3(0.9, 0.9, 0.9);
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(transformed, 1.0);
-        }
-      `,
-      fragmentShader: `
-        varying vec3 vColor;
-        void main() {
-          gl_FragColor = vec4(vColor, 1.0);
-        }
-      `,
-      side: THREE.DoubleSide,
-    });
-
-    const mesh = new THREE.InstancedMesh(baseGeometry, baseMaterial, total);
-    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-
-    for (let i = 0; i < countX; i++) {
-      for (let j = 0; j < countZ; j++) {
-        const x = (i / countX - 0.5) * 4;
-        const z = (j / countZ - 0.5) * 4;
-        dummy.position.set(x, 0, z);
-        dummy.updateMatrix();
-        mesh.setMatrixAt(i * countZ + j, dummy.matrix);
+    for (let i = 0; i < bladeCountX; i++) {
+      for (let j = 0; j < bladeCountX; j++) {
+        const line = new THREE.Line(geometry.clone(), material.clone());
+        line.position.set(
+          (i - bladeCountX / 2) * spacing,
+          0,
+          (j - bladeCountX / 2) * spacing
+        );
+        line.userData.angle = 0;
+        scene.add(line);
+        blades.push(line);
       }
     }
-
-    scene.add(mesh);
 
     const onMouseMove = (e) => {
       const rect = renderer.domElement.getBoundingClientRect();
@@ -87,20 +51,25 @@ export default function FurField() {
       const y = ((e.clientY - rect.top) / rect.height - 0.5) * -4;
       mouse.current.set(x, y);
     };
-    window.addEventListener('mousemove', onMouseMove);
+    renderer.domElement.addEventListener('mousemove', onMouseMove);
 
-    const clock = new THREE.Clock();
     const animate = () => {
-      const delta = clock.getDelta();
-      const damping = 10.0;
+      blades.forEach((blade) => {
+        const dx = mouse.current.x - blade.position.x;
+        const dz = mouse.current.y - blade.position.z;
+        const dist = Math.sqrt(dx * dx + dz * dz);
+        const maxDist = 0.5;
 
-      const velX = mouse.current.x - lastMouse.current.x;
-      direction.current += (velX - direction.current) * delta * damping;
+        let influence = Math.max(0, 1 - dist / maxDist);
+        const angle = influence * Math.sign(dx) * Math.PI / 2;
+        blade.userData.angle += (angle - blade.userData.angle) * 0.1;
 
-      baseMaterial.uniforms.uMouse.value.copy(mouse.current);
-      baseMaterial.uniforms.uDirection.value = direction.current;
-
-      lastMouse.current.copy(mouse.current);
+        const positions = blade.geometry.attributes.position.array;
+        const bend = Math.sin(blade.userData.angle) * 0.5;
+        positions[3] = bend; // x of tip
+        positions[4] = Math.cos(blade.userData.angle); // y of tip
+        blade.geometry.attributes.position.needsUpdate = true;
+      });
 
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
@@ -108,16 +77,11 @@ export default function FurField() {
     animate();
 
     return () => {
-      window.removeEventListener('mousemove', onMouseMove);
+      renderer.domElement.removeEventListener('mousemove', onMouseMove);
       renderer.dispose();
       container.removeChild(renderer.domElement);
     };
   }, []);
 
-  return (
-    <div
-      ref={containerRef}
-      style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}
-    ></div>
-  );
+  return <div ref={containerRef} style={{ width: '100vw', height: '100vh' }} />;
 }
