@@ -14,6 +14,7 @@ export default function GrassDisplacement() {
     const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100);
     camera.position.set(0, 5, 5);
     camera.lookAt(0, 0, 0);
+    
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(width, height);
@@ -69,7 +70,7 @@ export default function GrassDisplacement() {
         const maxDist = 1.1;
 
         let influence = Math.max(0, 1 - dist / maxDist);
-        const angle = influence * Math.sign(dx) * Math.PI / 2;
+        const angle = influence * Math.sign(dx) * (210 * Math.PI / 180);
 
         if (influence > 0) {
           blade.userData.lastInfluenced = performance.now();
