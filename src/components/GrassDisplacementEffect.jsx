@@ -70,7 +70,9 @@ export default function GrassDisplacement() {
 
         let influence = Math.max(0, 1 - dist / maxDist);
         const angle = influence * Math.sign(dx) * Math.PI / 2;
-        blade.userData.angle += (angle - blade.userData.angle) * 0.1;
+        const targetAngle = influence > 0 ? angle : 0;
+        const easing = influence > 0 ? 0.69 : 0.005;
+        blade.userData.angle += (targetAngle - blade.userData.angle) * easing;
 
         const positions = blade.geometry.attributes.position.array;
         const bend = Math.sin(blade.userData.angle) * 0.5;
