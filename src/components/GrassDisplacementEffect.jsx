@@ -23,7 +23,7 @@ export default function GrassDisplacement() {
     const bladeCountX = 80;
     const bladeCountZ = 50;
     const spacingZ = 0.3;
-    const baseSpacingX = 0.12; // reset base spacing to previous wider value
+    const baseSpacingX = 0.12;
 
     const geometry = new THREE.BufferGeometry();
     const points = new Float32Array(6);
@@ -38,7 +38,7 @@ export default function GrassDisplacement() {
 
     for (let j = 0; j < bladeCountZ; j++) {
       const z = (j - centerZ) * spacingZ;
-      const fanOut = 1 - Math.pow(j / bladeCountZ, 2); // restore previous outward fan effect
+      const fanOut = 1 - Math.pow(j / bladeCountZ, 2);
 
       for (let i = 0; i < bladeCountX; i++) {
         const centerOffset = i - centerX;
@@ -53,18 +53,20 @@ export default function GrassDisplacement() {
 
     const onMouseMove = (e) => {
       const rect = renderer.domElement.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width - 0.5) * 8;
-      const y = ((e.clientY - rect.top) / rect.height - 0.5) * 8;
+      const normX = (e.clientX - rect.left) / rect.width;
+      const normY = (e.clientY - rect.top) / rect.height;
+      const x = (normX - 0.5) * bladeCountX * baseSpacingX * 1.69;
+      const y = (normY - 0.5) * bladeCountZ * spacingZ;
       mouse.current.set(x, y);
     };
-    renderer.domElement.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mousemove', onMouseMove);
 
     const animate = () => {
       blades.forEach((blade) => {
         const dx = mouse.current.x - blade.position.x;
         const dz = mouse.current.y - blade.position.z;
         const dist = Math.sqrt(dx * dx + dz * dz);
-        const maxDist = 0.6;
+        const maxDist = 0.8;
 
         let influence = Math.max(0, 1 - dist / maxDist);
         const angle = influence * Math.sign(dx) * Math.PI / 2;
@@ -83,7 +85,7 @@ export default function GrassDisplacement() {
     animate();
 
     return () => {
-      renderer.domElement.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mousemove', onMouseMove);
       renderer.dispose();
       container.removeChild(renderer.domElement);
     };
