@@ -70,8 +70,15 @@ export default function GrassDisplacement() {
 
         let influence = Math.max(0, 1 - dist / maxDist);
         const angle = influence * Math.sign(dx) * Math.PI / 2;
+
+        if (influence > 0) {
+          blade.userData.lastInfluenced = performance.now();
+        }
+
+        const timeSinceInfluence = performance.now() - (blade.userData.lastInfluenced || 0);
+        const delay = 2500; // milliseconds before rise-back starts
+        const easing = influence > 0 ? 0.69 : (timeSinceInfluence > delay ? 0.005 : 0);
         const targetAngle = influence > 0 ? angle : 0;
-        const easing = influence > 0 ? 0.69 : 0.005;
         blade.userData.angle += (targetAngle - blade.userData.angle) * easing;
 
         const positions = blade.geometry.attributes.position.array;
