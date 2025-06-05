@@ -48,7 +48,7 @@ export default function GrassDisplacement() {
     const onMouseMove = (e) => {
       const rect = renderer.domElement.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width - 0.5) * (width / 100);
-      const y = ((e.clientY - rect.top) / rect.height - 0.5) * -(height / 100);
+      const y = ((e.clientY - rect.top) / rect.height - 0.5) * (height / 100); // INVERTED Z for natural screen top-to-bottom
       mouse.current.set(x, y);
     };
     renderer.domElement.addEventListener('mousemove', onMouseMove);
