@@ -55,7 +55,7 @@ export default function GrassDisplacement() {
       const rect = renderer.domElement.getBoundingClientRect();
       const normX = (e.clientX - rect.left) / rect.width;
       const normY = (e.clientY - rect.top) / rect.height;
-      const x = (normX - 0.5) * bladeCountX * baseSpacingX * 1.69;
+      const x = (normX - 0.5) * bladeCountX * baseSpacingX * 1.8;
       const y = (normY - 0.5) * bladeCountZ * spacingZ;
       mouse.current.set(x, y);
     };
@@ -66,7 +66,7 @@ export default function GrassDisplacement() {
         const dx = mouse.current.x - blade.position.x;
         const dz = mouse.current.y - blade.position.z;
         const dist = Math.sqrt(dx * dx + dz * dz);
-        const maxDist = 0.8;
+        const maxDist = 1.1;
 
         let influence = Math.max(0, 1 - dist / maxDist);
         const angle = influence * Math.sign(dx) * Math.PI / 2;
