@@ -12,7 +12,7 @@ export default function GrassDisplacement() {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100);
-    camera.position.set(0, 2, 5);
+    camera.position.set(0, 2, 8);
     camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -20,8 +20,8 @@ export default function GrassDisplacement() {
     container.appendChild(renderer.domElement);
 
     const blades = [];
-    const bladeCountX = 100;
-    const spacing = 0.1;
+    const bladeCountX = 30;
+    const spacing = 0.4;
 
     const geometry = new THREE.BufferGeometry();
     const points = new Float32Array(6);
@@ -47,8 +47,8 @@ export default function GrassDisplacement() {
 
     const onMouseMove = (e) => {
       const rect = renderer.domElement.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width - 0.5) * 4;
-      const y = ((e.clientY - rect.top) / rect.height - 0.5) * -4;
+      const x = ((e.clientX - rect.left) / rect.width - 0.5) * (width / 100);
+      const y = ((e.clientY - rect.top) / rect.height - 0.5) * -(height / 100);
       mouse.current.set(x, y);
     };
     renderer.domElement.addEventListener('mousemove', onMouseMove);
@@ -58,7 +58,7 @@ export default function GrassDisplacement() {
         const dx = mouse.current.x - blade.position.x;
         const dz = mouse.current.y - blade.position.z;
         const dist = Math.sqrt(dx * dx + dz * dz);
-        const maxDist = 0.5;
+        const maxDist = 1.0;
 
         let influence = Math.max(0, 1 - dist / maxDist);
         const angle = influence * Math.sign(dx) * Math.PI / 2;
