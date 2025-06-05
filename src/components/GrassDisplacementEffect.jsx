@@ -3,7 +3,7 @@ import * as THREE from 'three';
 
 export default function GrassDisplacement() {
   const containerRef = useRef();
-  const mouse = useRef(new THREE.Vector2());
+  const mouse = useRef(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -58,14 +58,15 @@ export default function GrassDisplacement() {
       const normY = (e.clientY - rect.top) / rect.height;
       const x = (normX - 0.5) * bladeCountX * baseSpacingX * 1.8;
       const y = (normY - 0.5) * bladeCountZ * spacingZ;
+      if (!mouse.current) mouse.current = new THREE.Vector2();
       mouse.current.set(x, y);
     };
     window.addEventListener('mousemove', onMouseMove);
 
     const animate = () => {
       blades.forEach((blade) => {
-        const dx = mouse.current.x - blade.position.x;
-        const dz = mouse.current.y - blade.position.z;
+        const dx = (mouse.current?.x ?? Infinity) - blade.position.x;
+        const dz = (mouse.current?.y ?? Infinity) - blade.position.z;
         const dist = Math.sqrt(dx * dx + dz * dz);
         const maxDist = 1.1;
 

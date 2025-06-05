@@ -1,6 +1,7 @@
 ### TO DO
 * add resume /path
 * Add title to website
+* favicon
 * footer that matches color of grass "Vibe Coded With ChatGPT. Thanks, Chat"
 * Socials - bsky (dev), bsky (tyrowo rickybot project), github, leetcode, linkedin, email
 * media that goes overtop of the grass, projects and such
