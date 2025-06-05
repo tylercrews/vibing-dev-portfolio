@@ -1,3 +1,22 @@
+### TO DO
+* add resume /path
+* Add title to website
+* footer that matches color of grass "Vibe Coded With ChatGPT. Thanks, Chat"
+* Socials - bsky (dev), bsky (tyrowo rickybot project), github, leetcode, linkedin, email
+* media that goes overtop of the grass, projects and such
+* Resizing to monitor size
+
+* toggle to turn off all content except for the grass
+* need to create settings menu with 
+* * color selector, 
+* * add rainbow effect 
+* * add gradient choice (one color when upright and one color when squished and it is on a gradient in between)
+* * add slider for area of effect size (that's the var maxDist)
+
+## further off to do
+* coding adjacent blog posts - "thought pieces"
+* mobile version?
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
